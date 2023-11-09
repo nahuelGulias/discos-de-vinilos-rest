@@ -13,15 +13,29 @@ class ViniloController extends ApiController
         $this->model = new ViniloModel();
     }
 
-    public function getVinilos($params = [])
-    {
-        if (empty($params)) {
-            $vinilos = $this->model->getVinilos();
+
+    public function getAllVinilos()
+    {   //En caso de venir con filtros/query se muestra segun orden y columna.
+        if (isset($_GET['campo']) && isset($_GET['orden'])) {
+            if ((($_GET['campo'] == 'id_vinilo') || ($_GET['campo'] == 'vinilo') || ($_GET['campo'] == 'anio_lanzamiento') || ($_GET['campo'] == 'precio')) && ($_GET['orden'] == 'asc') || (($_GET['orden'] == 'desc'))) {
+                $campo =  $_GET['campo'];
+                $orden = $_GET['orden'];
+                $orden = $this->model->ordenar($campo, $orden);
+                $this->view->response($orden, 200);
+            } else
+                $this->view->response('Campos incompletos.', 400);
+        } else { //Si no viene ningun parametro/query se muestran todos.
+            $vinilos = $this->model->getAllVinilos();
             $this->view->response($vinilos, 200);
-        } else {
+        }
+    }
+
+    public function getVinilo($params = [])
+    { //Obtiene un solo vinilo.
+        if (isset($params[':ID'])) {// Si viene solo con :ID, se muestra json completo.
             $vinilo = $this->model->getViniloById($params[':ID']);
             if (!empty($vinilo)) {
-                if (isset($params[':subrecurso'])) {
+                if (isset($params[':subrecurso'])) {//En caso de venir con :ID/:subrecurso.
                     switch ($params[':subrecurso']) {
                         case 'vinilo':
                             $this->view->response($vinilo->vinilo, 200);
@@ -35,7 +49,7 @@ class ViniloController extends ApiController
                         default:
                             $this->view->response('La tarea no contiene la solicitud:  ' . $params[':subrecurso'] . '.', 404);
                     }
-                } else {
+                } else {//Si viene sin :ID se muestra solo.
                     $this->view->response($vinilo, 200);
                 }
             } else {
@@ -44,11 +58,11 @@ class ViniloController extends ApiController
         }
     }
 
+
     public function insertarVinilo()
     {
-        //PREGUNTAR SI PUEDE SER CONST
         $body = $this->getData();
-
+        //Controlo que todos los campos esten completos al momento de capturar los datos.
         if (!empty($body->vinilo) || !empty($body->anio_lanzamiento) || !empty($body->precio) || !empty($body->id_artista)) {
             $vinilo = $body->vinilo;
             $lanzamiento = $body->anio_lanzamiento;
@@ -60,7 +74,7 @@ class ViniloController extends ApiController
         $viniloInsertado = $this->model->insertarVinilo($vinilo, $id_artista, $precio, $lanzamiento);
 
         if ($viniloInsertado) {
-            $this->view->response('Vinilo insertado con exito', 201);
+            $this->view->response('Vinilo insertado con exito con el id = ' . $viniloInsertado . '.', 201);
         } else {
             $this->view->response('Error al insertar vinilo', 404);
         }
@@ -77,19 +91,13 @@ class ViniloController extends ApiController
             $this->view->response('Campos incompletos', 404);
             return;
         }
-    
-         $this->model->modificarVinilo($precio, $id);
-         $this->view->response('Modificacion exitosa', 201);//Esta bien o no pongo nada ? (preguntar )
-    }
 
-    //      PREGUNTAR EN CLASE MIERCOLES
-    public function ordenar()
-    {
-        if (isset($_GET['order-asc'])) {
-            $this->model->ordenarAsc();
-        } else {
-            if (isset($_GET['order-desc']))
-                $this->model->ordenarDesc();
+        $viniloModificado = $this->model->modificarVinilo($precio, $id);
+        if($viniloModificado)
+            $this->view->response('Modificacion exitosa.', 201);
+        else{
+            $this->view->response('Modificacion sin exito.', 201);
         }
+            
     }
 }

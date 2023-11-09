@@ -3,12 +3,12 @@
 require_once 'app/models/model.php';
 class ViniloModel extends Model{
 
-    public function getVinilos(){
+    function getAllVinilos(){
         $query = $this->db->prepare('SELECT * FROM vinilos');
         $query->execute();
-        $vinilos = $query->fetchAll(PDO::FETCH_OBJ);
+        $vinilos= $query->fetchAll(PDO::FETCH_OBJ);
         return $vinilos;
-    }
+    } 
 
     public function getViniloById($idVinilo){
         $query = $this->db->prepare('SELECT * FROM vinilos where id_vinilo= ?');
@@ -26,16 +26,14 @@ class ViniloModel extends Model{
     public function modificarVinilo($precio, $id){
         $query= $this->db->prepare('UPDATE vinilos SET precio = ? WHERE vinilos.id_vinilo = ?');
         $query->execute([$precio, $id]);
+        return $query->rowCount();
     }
 
-    public function ordenarAsc(){
-        $query = $this->db->prepare('SELECT * FROM vinilos ORDER BY vinilos.id_vinilo ASC');
+    public function ordenar($campo, $orden){
+        $query = $this->db->prepare("SELECT * FROM vinilos ORDER BY $campo $orden");
         $query->execute();
-    }
-
-    public function ordenarDesc(){
-        $query = $this->db->prepare('SELECT * FROM vinilos ORDER BY vinilos.id_vinilo DESC');
-        $query->execute();
+        $items = $query->fetchAll(PDO::FETCH_OBJ);
+        return $items;
     }
     
        
