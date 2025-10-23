@@ -6,9 +6,13 @@ url_ejemplo: ./api/endpoint/:ID/:subrecurso
 ENDPOINTS:
 
 GET || /api/vinilos                  Devuelve todos los vinilos. En el caso de especificar las querys de 'campo' y 'orden', se obtienen ordenados.
+
 GET || /api/vinilos/:ID              Devuelve el vininilo con el id solicitado.
+
 GET || /api/vinilos/:ID/subrecurso   Devuelve el valor del campo del vinilo especificado.
+
 POST|| /api/vinilos                  Inserta el vinilo con la informacion dada mediante un JSON en el body. Se completan todos los campos ("vinilo", "anio_lanzamiento", "precio", "id_artista") exceptuando el id del mismo vinilo.
+
 PUT|| /api/vinilos/:ID               Modifica el vinilo solicitado, obteniendo la informacion mediante un JSON en el body, se completan los campos "precio" y "id_vinilo".
 
 Esto se repite con /api/artistas .
